@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Home</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body>
+    <nav>
+        <button id="home-btn">Home</button>
+        <button id="create-post-btn">Create Post</button>
+        <button id="profile-btn">Profile</button>
+        <button id="logout-btn">Logout</button>
+    </nav>
+    <main class="container">
+        <section id="home-section">
+            <h2>All Posts</h2>
+            <div id="posts-container"></div>
+        </section>
+
+        <section id="create-section" class="hidden">
+            <h2>Create a New Post</h2>
+            <form id="create-post-form">
+                <input type="text" id="title" name="title" placeholder="Title" required>
+                <textarea id="content" name="body" placeholder="Content" required></textarea>
+                <input type="file" id="postMedia" name="postMedia">
+                <button type="submit">Create</button>
+            </form>
+        </section>
+
+        <section id="post-detail-section" class="hidden">
+        </section>
+    </main>
+    <script src="JS/script.js"></script>
+</body>
+</html>

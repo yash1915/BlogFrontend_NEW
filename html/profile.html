@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="styles.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body>
+    <div class="container">
+        <a href="hom.html" class="back-link">&larr; Back to Home</a>
+        
+        <h1>Your Profile</h1>
+        <div id="profile-details"></div>
+
+        <button id="my-posts-btn">My Posts</button>
+
+        <h2>Update Profile</h2>
+        <form id="update-profile-form">
+            <textarea id="about" placeholder="Tell us about yourself"></textarea>
+            <button type="submit">Update</button>
+        </form>
+
+        <h2>Delete Account</h2>
+        <form id="delete-account-form">
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button type="submit" class="danger-btn">Delete Account</button>
+        </form>
+
+        <button id="logout-btn">Logout</button>
+    </div>
+    
+    <div id="my-posts-section" class="container hidden" style="margin-top: 2rem;">
+        <h2>My Posts</h2>
+        <div id="my-posts-container"></div>
+    </div>
+
+    <script src="JS/profile.js"></script> 
+</body>
+</html>
