@@ -1,3 +1,5 @@
+// b/frontend/html/JS/reset.js
+
 document.getElementById('resetForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const newPassword = document.getElementById('newPassword').value;
@@ -7,25 +9,25 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     
-    // Retrieve the device token from local storage
-    const deviceToken = localStorage.getItem('deviceToken');
+    // --- REMOVE THE deviceToken LOGIC ---
+    // const deviceToken = localStorage.getItem('deviceToken'); // DELETE THIS LINE
 
     if (!token) {
         alert("Invalid or missing reset token.");
         return;
     }
 
-    if (!deviceToken) {
-        alert("This link can only be used on the device where the reset request was initiated.");
-        return;
-    }
+    // --- DELETE THIS ENTIRE "if" BLOCK ---
+    // if (!deviceToken) {
+    //     alert("This link can only be used on the device where the reset request was initiated.");
+    //     return;
+    // }
 
     if (newPassword !== confirmPassword) {
         alert("Passwords do not match!");
         return;
     }
 
-    // Disable button and show spinner
     button.disabled = true;
     button.classList.add("loading");
     
@@ -33,8 +35,8 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
         const res = await fetch('https://blogbackend-new.onrender.com/api/v1/auth/reset-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // Include the device token in the request body
-            body: JSON.stringify({ token, password: newPassword, confirmPassword, deviceToken })
+            // Update the body to remove deviceToken
+            body: JSON.stringify({ token, password: newPassword, confirmPassword })
         });
         const data = await res.json();
         if(data.success) {
@@ -47,7 +49,6 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
     } catch(err) {
         alert('An error occurred.');
     } finally {
-        // Re-enable button and hide spinner
         button.disabled = false;
         button.classList.remove("loading");
     }
