@@ -1,6 +1,33 @@
 document.addEventListener("DOMContentLoaded", () => {
     const API_URL = "https://blogbackend-new.onrender.com/api/v1";
     let currentUser = null;
+    // --- BUTTON HELPER ---(ye function sabse niche use hua hai)
+const handleAsyncClick = async (button, asyncFunction) => {
+    if (!button || button.disabled) return;
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    // Hum "Loading..." text sirf specific buttons par dikhayenge
+    if (button.classList.contains('view-post-btn') || button.classList.contains('delete-post-btn')) {
+        button.textContent = 'Loading...';
+    }
+
+    try {
+        await asyncFunction(); // Aapka main kaam yahan hoga
+    } catch (error) {
+        console.error("An error occurred during the async operation:", error);
+        // User ko error dikhana zaroori hai
+        alert("An operation could not be completed. Please try again.");
+    } finally {
+        // Kuch buttons (jaise delete) page ko reload kar dete hain,
+        // isliye unhe re-enable karne ki zaroorat nahin padti.
+        // Hum check karenge ki button abhi bhi page par hai ya nahin.
+        if (document.body.contains(button)) {
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    }
+};
 
     // --- DOM Elements ---
     const sections = {
@@ -10,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const postsContainer = document.getElementById("posts-container");
     const createPostForm = document.getElementById("create-post-form");
+    const createPostButton = createPostForm.querySelector("button");
 
     // --- UTILS ---
     const getToken = () => localStorage.getItem("token");
@@ -42,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // --- RENDER FUNCTIONS ---
-    const renderPosts = (posts) => {
+    const renderPosts = (posts) => { 
         postsContainer.innerHTML = "";
         posts.forEach(post => {
             const postDiv = document.createElement("div");
@@ -57,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
             postsContainer.appendChild(postDiv);
         });
     };
-
     const renderPostDetail = (post) => {
         const isAuthor = post.author._id === currentUser._id;
         const isLiked = post.likes.some(like => like._id === currentUser._id);
@@ -126,8 +153,8 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Error loading posts.");
         }
     };
-
     const openPost = async (postId) => {
+        
         try {
             const res = await fetch(`${API_URL}/posts/${postId}`);
             if (!res.ok) throw new Error("Could not fetch post details.");
@@ -157,10 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch(err) {
             console.error("Error creating post:", err);
             alert("Could not create post: " + err.message);
-        }
+        } 
     };
-
     const handleEditPost = (postId) => {
+        
         const newTitle = prompt("Enter the new title:");
         const newBody = prompt("Enter the new body:");
         if (newTitle === null || newBody === null) return;
@@ -179,8 +206,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
             console.error("Error updating post:", err);
             alert("Could not update post.");
-        }
-    };
+        } 
+    }
 
     const handleDeletePost = async (postId) => {
         if (!confirm("Are you sure?")) return;
@@ -194,48 +221,120 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    const handleLikePost = async (postId) => {
-        try {
-            const res = await fetch(`${API_URL}/posts/${postId}/toggle-like`, { method: 'POST', headers: getAuthHeaders() });
-            if (!res.ok) throw new Error("Failed to like post");
-            openPost(postId);
-        } catch (err) {
-            console.error("Error liking post:", err);
+   const handleLikePost = async (postId) => {
+    const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+    const likeButton = postElement.querySelector(`.like-post-btn[data-id="${postId}"]`);
+    const likeContainer = likeButton.closest('.like-container');
+
+    if (likeButton.disabled) return;
+    likeButton.disabled = true;
+
+    // UI ko turant update karein (for speed)
+    const isLikedNow = likeButton.classList.toggle('liked');
+    const countSpan = likeButton.querySelector('i').nextSibling;
+    let currentCount = parseInt(countSpan.textContent.trim().replace('(', '').replace(')', ''));
+    countSpan.textContent = ` (${isLikedNow ? currentCount + 1 : currentCount - 1})`;
+
+    try {
+        const res = await fetch(`${API_URL}/posts/${postId}/toggle-like`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+
+        if (!res.ok) throw new Error("Server error");
+        
+        const data = await res.json();
+        const updatedLikes = data.post.likes; // Server se updated list
+
+        // Tooltip ko server ke data se theek karein
+        let tooltip = likeContainer.querySelector('.liked-by-tooltip');
+        
+        if (updatedLikes.length > 0) {
+            const likedByNames = updatedLikes.map(user => `${user.firstName} ${user.lastName}`).join('\n');
+            if (!tooltip) {
+                // Agar tooltip nahin hai, to banayein
+                tooltip = document.createElement('div');
+                tooltip.className = 'liked-by-tooltip';
+                likeContainer.appendChild(tooltip);
+            }
+            tooltip.textContent = likedByNames;
+        } else {
+            // Agar likes 0 hain, to tooltip हटा dein
+            if (tooltip) {
+                tooltip.remove();
+            }
         }
-    };
+        // Count ko bhi server ke data se sync karein
+        countSpan.textContent = ` (${updatedLikes.length})`;
 
-    const handleCommentSubmit = async (e, parentCommentId = null) => {
-        e.preventDefault();
-        const postId = e.target.closest('.post-detail-container').dataset.postId;
-        const body = e.target.querySelector('textarea').value.trim();
-        if (!body) return;
+    } catch (err) {
+        console.error("Error liking post:", err);
+        // Error aane par, post ko dobara render karein taaki sab theek ho jaye
+        openPost(postId); 
+    } finally {
+        likeButton.disabled = false;
+    }
+};
+   const handleCommentSubmit = async (e, parentCommentId = null) => {
+    const form = e.target;
+    const body = form.querySelector('textarea').value.trim();
 
-        try {
-            const res = await fetch(`${API_URL}/comments/create`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ postId, body, parentCommentId })
-            });
-            if (!res.ok) throw new Error("Failed to post comment");
-            openPost(postId);
-        } catch (err) {
-            console.error("Error submitting comment:", err);
-            alert(err.message);
-        }
-    };
+    if (!body) {
+        // Helper function ko batayein ki aage nahin badhna hai
+        throw new Error("Comment body cannot be empty.");
+    }
 
-    const handleCommentLike = async (commentId) => {
-        const postId = document.querySelector('.post-detail-container').dataset.postId;
-        try {
-            const res = await fetch(`${API_URL}/comments/${commentId}/toggle-like`, { method: 'POST', headers: getAuthHeaders() });
-            if (!res.ok) throw new Error("Failed to like comment");
-            openPost(postId);
-        } catch (err) {
-            console.error("Error liking comment:", err);
-        }
-    };
+    const postId = form.closest('.post-detail-container').dataset.postId;
 
-    const handleCommentDelete = async (commentId) => {
+    const res = await fetch(`${API_URL}/comments/create`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ postId, body, parentCommentId })
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to post comment");
+    }
+
+    // Safal hone par post ko dobara load karein
+    await openPost(postId);
+};
+   const handleCommentLike = async (commentId) => {
+    const likeButton = document.querySelector(`.comment-like-btn[data-comment-id="${commentId}"]`);
+    const likeContainer = likeButton.closest('.like-container');
+
+    if (likeButton.disabled) return;
+    likeButton.disabled = true;
+    
+    // UI ko turant update karein (for speed)
+    const isLikedNow = likeButton.classList.toggle('liked');
+    const countSpan = likeButton.querySelector('i').nextSibling;
+    let currentCount = parseInt(countSpan.textContent.trim().replace('(', '').replace(')', ''));
+    countSpan.textContent = ` (${isLikedNow ? currentCount + 1 : currentCount - 1})`;
+    
+    const postId = document.querySelector('.post-detail-container').dataset.postId;
+
+    try {
+        const res = await fetch(`${API_URL}/comments/${commentId}/toggle-like`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+        
+        if (!res.ok) throw new Error("Server error");
+        
+        // Server se confirmation ke baad, poore post ko re-render karein
+        // Yeh comment tooltip ko theek kar dega
+        openPost(postId);
+
+    } catch (err) {
+        console.error("Error liking comment:", err);
+        openPost(postId);
+    } finally {
+        likeButton.disabled = false;
+    }
+};
+      const handleCommentDelete = async (commentId) => {
         if (!confirm("Are you sure?")) return;
         const postId = document.querySelector('.post-detail-container').dataset.postId;
         try {
@@ -265,7 +364,8 @@ document.addEventListener("DOMContentLoaded", () => {
             openPost(postId);
         } catch (err) {
             console.error("Error updating comment:", err);
-        }
+        }finally {
+    }
     };
 
     const showReplyForm = (commentId) => {
@@ -287,37 +387,149 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         container.querySelector('textarea').focus();
     };
+    
+   
 
-    // --- EVENT LISTENERS ---
-    document.getElementById("home-btn").addEventListener("click", loadPosts);
-    document.getElementById("create-post-btn").addEventListener("click", () => showSection('create'));
-    document.getElementById("profile-btn").addEventListener("click", () => window.location.href = "profile.html");
-    document.getElementById("logout-btn").addEventListener("click", logout);
-    createPostForm.addEventListener("submit", handleCreatePost);
+   // --- EVENT LISTENERS ---
+
+// Home Button
+document.getElementById("home-btn").addEventListener("click", (e) => {
+    handleAsyncClick(e.target, loadPosts);
+});
+
+// Create Post Button (Yeh sirf section badalta hai, isliye helper ki zaroorat nahin)
+document.getElementById("create-post-btn").addEventListener("click", () => {
+    showSection('create');
+});
+
+// Profile Button (Yeh page navigate karta hai, isliye helper ki zaroorat nahin)
+document.getElementById("profile-btn").addEventListener("click", () => {
+    window.location.href = "profile.html";
+});
+
+// Logout Button (Yeh bhi page navigate karta hai)
+document.getElementById("logout-btn").addEventListener("click", logout);
+
+// Create Post Form Submission
+createPostForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const submitButton = createPostForm.querySelector('button');
+    
+    // Yahan hum helper function ka istemal kar rahe hain
+    handleAsyncClick(submitButton, () => handleCreatePost(e));
+});
 
     document.body.addEventListener('click', (e) => {
-        if (e.target.classList.contains('view-post-btn')) openPost(e.target.dataset.id);
-        if (e.target.id === 'back-to-home-btn') loadPosts();
-        if (e.target.classList.contains('delete-post-btn')) handleDeletePost(e.target.dataset.id);
-        if (e.target.classList.contains('like-post-btn')) handleLikePost(e.target.dataset.id);
-        if (e.target.classList.contains('edit-post-btn')) handleEditPost(e.target.dataset.id);
+             const button = e.target.closest('button'); // Clicked element ya uske parent button ko dhoondein
+    if (!button) return; // Agar button par click nahin hua to kuch na karein
+
+    // View Details Button
+    if (button.classList.contains('view-post-btn')) {
+        handleAsyncClick(button, () => openPost(button.dataset.id));
+    }
+    // Back to Home Button
+    if (button.id === 'back-to-home-btn') {
+        handleAsyncClick(button, loadPosts);
+    }
+    // Delete Post Button
+    if (button.classList.contains('delete-post-btn')) {
+        // Iske andar confirm() hai, isliye iska logic thoda alag hai
+        handleAsyncClick(button, () => handleDeletePost(button.dataset.id));
+    }
+    // Like Post Button (Iska apna alag logic hai, use waise hi rehne dein)
+    if (button.classList.contains('like-post-btn')) {
+        handleLikePost(button.dataset.id);
+    }
+    // Edit Post Button
+    if (button.classList.contains('edit-post-btn')) {
+        // prompt() UI ko block karta hai, isliye is par helper ki zaroorat nahin
+        handleEditPost(button.dataset.id);
+    }
+    // Comment Like Button (Iska bhi apna alag logic hai)
+    if (button.classList.contains('comment-like-btn')) {
+        handleCommentLike(button.dataset.commentId);
+    }
+    // Delete Comment Button
+    if (button.classList.contains('comment-delete-btn')) {
+        handleAsyncClick(button, () => handleCommentDelete(button.dataset.commentId));
+    }
+    // Edit Comment Button
+    if (button.classList.contains('comment-edit-btn')) {
+        // prompt() UI ko block karta hai, isliye is par helper ki zaroorat nahin
+        handleCommentEdit(button.dataset.commentId, button.dataset.currentBody);
+    }
+    // Reply Button (Yeh UI change karta hai, API call nahin)
+    if (button.classList.contains('comment-reply-btn')) {
+        showReplyForm(button.dataset.commentId);
+    }
+
+
+        // Desktop par Like ke liye click event
+        if (window.innerWidth > 768) {
+            const likeBtn = e.target.closest('.like-post-btn');
+            if (likeBtn) handleLikePost(likeBtn.dataset.id);
+
+            const commentLikeBtn = e.target.closest('.comment-like-btn');
+            if (commentLikeBtn) handleCommentLike(commentLikeBtn.dataset.commentId);
+        }
+    });
+
+    // === MOBILE TOUCH EVENTS FOR LIKE BUTTON ===
+    let pressTimer;
+    let isLongPress = false;
+
+    document.body.addEventListener('touchstart', (e) => {
+        const likeContainer = e.target.closest('.like-container');
+        if (!likeContainer) return;
+
+        isLongPress = false;
+        pressTimer = window.setTimeout(() => {
+            isLongPress = true;
+            likeContainer.classList.add('show-tooltip');
+        }, 500); // 0.5 second hold
+    }, { passive: true });
+
+    document.body.addEventListener('touchend', (e) => {
+        const likeContainer = e.target.closest('.like-container');
+        if (!likeContainer) return;
         
-        if (e.target.classList.contains('comment-like-btn')) handleCommentLike(e.target.dataset.commentId);
-        if (e.target.classList.contains('comment-delete-btn')) handleCommentDelete(e.target.dataset.commentId);
-        if (e.target.classList.contains('comment-edit-btn')) handleCommentEdit(e.target.dataset.commentId, e.target.dataset.currentBody);
-        if (e.target.classList.contains('comment-reply-btn')) showReplyForm(e.target.dataset.commentId);
+        clearTimeout(pressTimer);
+        
+        if (isLongPress) {
+            setTimeout(() => {
+                likeContainer.classList.remove('show-tooltip');
+            }, 1500);
+        } else {
+            const likeButton = likeContainer.querySelector('.like-post-btn, .comment-like-btn');
+            if (likeButton.classList.contains('like-post-btn')) {
+                handleLikePost(likeButton.dataset.id);
+            } else {
+                handleCommentLike(likeButton.dataset.commentId);
+            }
+        }
     });
     
-    sections.detail.addEventListener('submit', (e) => {
-        if (e.target.id === 'comment-form') {
-            handleCommentSubmit(e);
-        }
-        if (e.target.classList.contains('reply-form')) {
-            const commentElement = e.target.closest('.comment');
-            const commentId = commentElement.querySelector('.small-btn').dataset.commentId;
-            handleCommentSubmit(e, commentId);
-        }
-    });
+   sections.detail.addEventListener('submit', (e) => {
+    const form = e.target;
+
+    // Top-level comments ke liye
+    if (form.id === 'comment-form') {
+        e.preventDefault(); // Form ko submit hone se rokein
+        const button = form.querySelector('button');
+        // Helper function ka istemal karein
+        handleAsyncClick(button, () => handleCommentSubmit(e));
+    }
+
+    // Replies ke liye
+    if (form.classList.contains('reply-form')) {
+        e.preventDefault(); // Form ko submit hone se rokein
+        const button = form.querySelector('button');
+        const commentId = form.closest('.comment').querySelector('[data-comment-id]').dataset.commentId;
+        // Helper function ka istemal karein
+        handleAsyncClick(button, () => handleCommentSubmit(e, commentId));
+    }
+});
+
 
     // --- INITIALIZE ---
     checkAuth();

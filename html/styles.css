@@ -41,7 +41,7 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     width: 100%;
-    max-width: 500px;
+    max-width: 800px;
     text-align: center;
 }
 
@@ -99,18 +99,47 @@ button {
     cursor: pointer;
     transition: all 0.4s ease;
     text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 button:hover {
-    background-position: right center; /* change the direction of the change here */
+    background-position: right center;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-button:disabled {
+/* Loading State for Buttons */
+button.loading {
     background-image: none;
     background-color: #555;
     cursor: not-allowed;
 }
+
+button .spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+button.loading .spinner {
+    display: inline-block;
+}
+
+button.loading .button-text {
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 
 /* --- Links --- */
 a {
@@ -156,10 +185,6 @@ nav button:hover {
 
 
 /* --- Home Page Specific --- */
-#home-section .container, #create-section .container, #post-detail-section .container {
-    max-width: 800px;
-}
-
 #posts-container {
     display: flex;
     flex-direction: column;
@@ -216,19 +241,13 @@ nav button:hover {
     color: var(--secondary-color);
 }
 
-/* --- Responsive Design --- */
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-    .container {
-        padding: 1.5rem;
-    }
-    nav {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
+.back-link {
+    display: block;
+    text-align: left;
+    margin-bottom: 1rem;
+    font-weight: 600;
 }
+
 /* --- Post Detail Page --- */
 .post-detail-container {
     background: var(--input-bg);
@@ -236,7 +255,6 @@ nav button:hover {
     border-radius: var(--border-radius);
     text-align: left;
     width: 100%;
-    max-width: 800px;
 }
 
 .back-btn {
@@ -248,8 +266,8 @@ nav button:hover {
 
 .post-media-full {
     width: 100%;
-    max-height: 500px; /* Badi image ko limit karega */
-    object-fit: contain; /* Image ko poora dikhayega */
+    max-height: 500px;
+    object-fit: contain;
     border-radius: var(--border-radius);
     margin: 1rem 0;
     background-color: rgba(0,0,0,0.2);
@@ -258,105 +276,58 @@ nav button:hover {
 .post-body {
     line-height: 1.8;
     margin: 1rem 0;
-    white-space: pre-wrap; /* Formatted text ko aane dega */
+    white-space: pre-wrap;
 }
 
 .post-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
     margin-top: 1rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--border-color);
 }
 
-.like-post-btn.liked {
+.like-post-btn.liked,
+.post-actions .like-post-btn.liked {
     background-image: linear-gradient(to right, #e91e63 0%, #ff9800 51%, #e91e63 100%);
 }
 
+.danger-btn {
+     background-image: linear-gradient(to right, #e91e63 0%, #ff5252 51%, #e91e63 100%);
+}
+
+/* --- Comment Section --- */
 .comments-section {
     margin-top: 1.5rem;
-}
-
-#comment-form textarea {
-    min-height: 80px;
-}
-
-#comments-container {
-    margin-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
 }
 
 .comment {
     background-color: rgba(0,0,0,0.2);
     padding: 0.75rem;
     border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.owner-comment {
+    background-color: rgba(80, 227, 194, 0.15);
     border-left: 3px solid var(--secondary-color);
 }
-/* --- Special Comment for Post Owner (Point 1) --- */
 
-
-
-/* --- Back Link on Profile Page (Point 4) --- */
-.back-link {
-    display: block;
-    text-align: left;
-    margin-bottom: 1rem;
-    font-weight: 600;
-}
-
-/* --- Danger Button for Deletion --- */
-.danger-btn {
-     background-image: linear-gradient(to right, #e91e63 0%, #ff5252 51%, #e91e63 100%);
-}
-
-.post-actions button {
-    font-size: 1.2rem; /* Make icons slightly bigger */
-}
-/* --- Liked By Tooltip Styles --- */
-.like-container {
-    position: relative; /* Tooltip ko position dene ke liye zaroori */
-    display: inline-block;
-}
-
-.liked-by-tooltip {
-    visibility: hidden; /* Shuruaat me chhipa hua */
-    width: 160px;
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 8px;
-    position: absolute;
-    z-index: 1;
-    bottom: 125%; /* Button ke upar dikhega */
-    left: 50%;
-    margin-left: -80px; /* Center me laane ke liye */
-    opacity: 0;
-    transition: opacity 0.3s;
-    white-space: pre-line; /* Har naam nayi line me aayega */
-    font-size: 0.8rem;
-}
-
-.like-container:hover .liked-by-tooltip {
-    visibility: visible; /* Hover karne par dikhega */
-    opacity: 1;
-}
-/* --- Owner Tag Style --- */
 .owner-tag {
     color: var(--secondary-color);
     font-size: 0.8em;
     font-weight: bold;
     margin-left: 5px;
 }
-/* --- Comment Actions & Replies --- */
+
 .comment-actions {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-top: 0.5rem;
 }
+
 .small-btn {
     background: none;
     border: none;
@@ -366,32 +337,110 @@ nav button:hover {
     opacity: 0.7;
     transition: opacity 0.2s, color 0.2s;
     color: var(--text-color);
+    text-transform: none;
 }
+
 .small-btn:hover {
     opacity: 1;
 }
+
 .comment-like-btn.liked {
     color: var(--primary-color);
     font-weight: bold;
 }
+
 .replies-container {
     margin-top: 0.75rem;
     margin-left: 1rem;
     padding-left: 1rem;
     border-left: 2px solid rgba(255, 255, 255, 0.1);
 }
-.reply {
-    margin-top: 0.75rem;
+
+/* --- Tooltip --- */
+.like-container {
+    position: relative;
+    display: inline-block;
 }
-.reply-form-container {
-    margin-top: 0.5rem;
+
+.liked-by-tooltip {
+    visibility: hidden;
+    width: 160px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -80px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: pre-line;
+    font-size: 0.8rem;
+    font-weight: 400;
+    text-transform: none;
 }
-.reply-form textarea {
-    width: 100%;
-    min-height: 60px;
-    margin-bottom: 0.5rem;
+
+/* Show tooltip on hover for desktop */
+@media (hover: hover) {
+    .like-container:hover .liked-by-tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
 }
-.reply-form button {
-    padding: 6px 10px;
-    font-size: 0.9em;
+
+/* Show tooltip on click/hold for mobile */
+.like-container.show-tooltip .liked-by-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+/* --- Responsive Design --- */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    .container {
+        padding: 1.5rem;
+        max-width: 100%;
+    }
+    nav {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    .post-actions {
+        font-size: 0.9rem;
+    }
+}
+/* --- Loading State for Buttons --- */
+button.loading {
+    background-image: none;
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+button .spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+button.loading .spinner {
+    display: inline-block;
+}
+
+button.loading .button-text {
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }

@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const verifyForm = document.getElementById("verify-form");
+    const verifyButton = verifyForm.querySelector("button");
     const API_URL = "https://blogbackend-new.onrender.com/api/v1";
 
     verifyForm.addEventListener("submit", async (e) => {
@@ -9,9 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!pendingSignup) {
             alert("Signup data not found. Please start over.");
-            window.location.href = "index.html";
+            window.location.href = "signup.html"; // index.html ki jagah signup.html
             return;
         }
+
+        // Button ko disable karein aur spinner dikhayein
+        verifyButton.disabled = true;
+        verifyButton.classList.add("loading");
 
         const finalSignupData = { ...pendingSignup, otp };
 
@@ -35,6 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error("Error verifying OTP:", error);
             alert("An error occurred.");
+        } finally {
+            // Button ko wapas normal state me laayein
+            verifyButton.disabled = false;
+            verifyButton.classList.remove("loading");
         }
     });
 });

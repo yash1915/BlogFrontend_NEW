@@ -1,6 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
     const API_URL = "https://blogbackend-new.onrender.com/api/v1";
     let currentUser = null;
+    // --- BUTTON HELPER ---
+const handleAsyncClick = async (button, asyncFunction) => {
+    if (!button || button.disabled) return;
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    if (button.classList.contains('view-post-details-btn')) {
+        button.textContent = 'Loading...';
+    }
+
+    try {
+        await asyncFunction();
+    } catch (error) {
+        console.error("An error occurred:", error);
+        alert("An operation could not be completed.");
+    } finally {
+        if (document.body.contains(button)) {
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    }
+};
 
     // --- DOM Elements ---
     const summarySection = document.getElementById("my-posts-summary-section");
@@ -168,40 +190,120 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const handleLikePost = async (postId) => {
-        try {
-            await fetch(`${API_URL}/posts/${postId}/toggle-like`, { method: 'POST', headers: getAuthHeaders() });
-            openPost(postId);
-        } catch (err) {
-            console.error("Error liking post:", err);
+    const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+    const likeButton = postElement.querySelector(`.like-post-btn[data-id="${postId}"]`);
+    const likeContainer = likeButton.closest('.like-container');
+
+    if (likeButton.disabled) return;
+    likeButton.disabled = true;
+
+    // UI ko turant update karein (for speed)
+    const isLikedNow = likeButton.classList.toggle('liked');
+    const countSpan = likeButton.querySelector('i').nextSibling;
+    let currentCount = parseInt(countSpan.textContent.trim().replace('(', '').replace(')', ''));
+    countSpan.textContent = ` (${isLikedNow ? currentCount + 1 : currentCount - 1})`;
+
+    try {
+        const res = await fetch(`${API_URL}/posts/${postId}/toggle-like`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+
+        if (!res.ok) throw new Error("Server error");
+        
+        const data = await res.json();
+        const updatedLikes = data.post.likes; // Server se updated list
+
+        // Tooltip ko server ke data se theek karein
+        let tooltip = likeContainer.querySelector('.liked-by-tooltip');
+        
+        if (updatedLikes.length > 0) {
+            const likedByNames = updatedLikes.map(user => `${user.firstName} ${user.lastName}`).join('\n');
+            if (!tooltip) {
+                // Agar tooltip nahin hai, to banayein
+                tooltip = document.createElement('div');
+                tooltip.className = 'liked-by-tooltip';
+                likeContainer.appendChild(tooltip);
+            }
+            tooltip.textContent = likedByNames;
+        } else {
+            // Agar likes 0 hain, to tooltip हटा dein
+            if (tooltip) {
+                tooltip.remove();
+            }
         }
-    };
+        // Count ko bhi server ke data se sync karein
+        countSpan.textContent = ` (${updatedLikes.length})`;
+
+    } catch (err) {
+        console.error("Error liking post:", err);
+        // Error aane par, post ko dobara render karein taaki sab theek ho jaye
+        openPost(postId); 
+    } finally {
+        likeButton.disabled = false;
+    }
+};
 
     const handleCommentSubmit = async (e, parentCommentId = null) => {
-        e.preventDefault();
-        const postId = e.target.closest('.post-detail-container').dataset.postId;
-        const body = e.target.querySelector('textarea').value.trim();
-        if (!body) return;
-        try {
-            await fetch(`${API_URL}/comments/create`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ postId, body, parentCommentId })
-            });
-            openPost(postId);
-        } catch (err) {
-            alert(err.message);
-        }
-    };
+    const form = e.target;
+    const body = form.querySelector('textarea').value.trim();
+
+    if (!body) {
+        // Helper function ko batayein ki aage nahin badhna hai
+        throw new Error("Comment body cannot be empty.");
+    }
+
+    const postId = form.closest('.post-detail-container').dataset.postId;
+
+    const res = await fetch(`${API_URL}/comments/create`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ postId, body, parentCommentId })
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to post comment");
+    }
+
+    // Safal hone par post ko dobara load karein
+    await openPost(postId);
+};
 
     const handleCommentLike = async (commentId) => {
-        const postId = document.querySelector('.post-detail-container').dataset.postId;
-        try {
-            await fetch(`${API_URL}/comments/${commentId}/toggle-like`, { method: 'POST', headers: getAuthHeaders() });
-            openPost(postId);
-        } catch (err) {
-            console.error("Error liking comment:", err);
-        }
-    };
+    const likeButton = document.querySelector(`.comment-like-btn[data-comment-id="${commentId}"]`);
+    const likeContainer = likeButton.closest('.like-container');
+
+    if (likeButton.disabled) return;
+    likeButton.disabled = true;
+    
+    // UI ko turant update karein (for speed)
+    const isLikedNow = likeButton.classList.toggle('liked');
+    const countSpan = likeButton.querySelector('i').nextSibling;
+    let currentCount = parseInt(countSpan.textContent.trim().replace('(', '').replace(')', ''));
+    countSpan.textContent = ` (${isLikedNow ? currentCount + 1 : currentCount - 1})`;
+    
+    const postId = document.querySelector('.post-detail-container').dataset.postId;
+
+    try {
+        const res = await fetch(`${API_URL}/comments/${commentId}/toggle-like`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+        
+        if (!res.ok) throw new Error("Server error");
+        
+        // Server se confirmation ke baad, poore post ko re-render karein
+        // Yeh comment tooltip ko theek kar dega
+        openPost(postId);
+
+    } catch (err) {
+        console.error("Error liking comment:", err);
+        openPost(postId);
+    } finally {
+        likeButton.disabled = false;
+    }
+};
 
     const handleCommentDelete = async (commentId) => {
         const postId = document.querySelector('.post-detail-container').dataset.postId;
@@ -246,38 +348,107 @@ document.addEventListener("DOMContentLoaded", () => {
         container.querySelector('textarea').focus();
     };
 
-    // --- EVENT LISTENERS ---
-    document.body.addEventListener('click', (e) => {
-        const button = e.target.closest('button');
-        if (!button) return;
+   // --- EVENT LISTENERS ---
+document.body.addEventListener('click', (e) => {
+    const button = e.target.closest('button');
+    if (!button) return;
 
-        if (button.classList.contains('view-post-details-btn')) openPost(button.dataset.id);
-        if (button.classList.contains('back-to-summary-btn')) {
+    // View Post Details Button
+    if (button.classList.contains('view-post-details-btn')) {
+        handleAsyncClick(button, () => openPost(button.dataset.id));
+    }
+    // Back to Summary Button
+    if (button.classList.contains('back-to-summary-btn')) {
+        handleAsyncClick(button, async () => {
             detailSection.classList.add('hidden');
             summarySection.classList.remove('hidden');
-            loadPostSummaries();
+            await loadPostSummaries();
+        });
+    }
+    // Delete Post Button
+    if (button.classList.contains('delete-post-btn')) {
+        handleAsyncClick(button, () => handleDeletePost(button.dataset.id));
+    }
+    // Like Post Button (Iska apna custom logic hai)
+    if (button.classList.contains('like-post-btn')) {
+        handleLikePost(button.dataset.id);
+    }
+    // Edit Post Button (prompt() use karta hai, isliye helper nahin chahiye)
+    if (button.classList.contains('edit-post-btn')) {
+        handleEditPost(button.dataset.id);
+    }
+    // Comment Like Button (Iska apna custom logic hai)
+    if (button.classList.contains('comment-like-btn')) {
+        handleCommentLike(button.dataset.commentId);
+    }
+    // Delete Comment Button
+    if (button.classList.contains('comment-delete-btn')) {
+        handleAsyncClick(button, () => handleCommentDelete(button.dataset.commentId));
+    }
+    // Edit Comment Button (prompt() use karta hai, isliye helper nahin chahiye)
+    if (button.classList.contains('comment-edit-btn')) {
+        handleCommentEdit(button.dataset.commentId, button.dataset.currentBody);
+    }
+    // Reply Button (UI change karta hai, API call nahin)
+    if (button.classList.contains('comment-reply-btn')) {
+        showReplyForm(button.dataset.commentId);
+    }
+});
+    // === MOBILE TOUCH EVENTS FOR LIKE BUTTON ===
+    let pressTimer;
+    let isLongPress = false;
+
+    document.body.addEventListener('touchstart', (e) => {
+        const likeContainer = e.target.closest('.like-container');
+        if (!likeContainer) return;
+
+        isLongPress = false;
+        pressTimer = window.setTimeout(() => {
+            isLongPress = true;
+            likeContainer.classList.add('show-tooltip');
+        }, 500); // 0.5 second hold
+    }, { passive: true });
+
+    document.body.addEventListener('touchend', (e) => {
+        const likeContainer = e.target.closest('.like-container');
+        if (!likeContainer) return;
+        
+        clearTimeout(pressTimer);
+        
+        if (isLongPress) {
+            setTimeout(() => {
+                likeContainer.classList.remove('show-tooltip');
+            }, 1500);
+        } else {
+            const likeButton = likeContainer.querySelector('.like-post-btn, .comment-like-btn');
+            if (likeButton.classList.contains('like-post-btn')) {
+                handleLikePost(likeButton.dataset.id);
+            } else {
+                handleCommentLike(likeButton.dataset.commentId);
+            }
         }
-        if (button.classList.contains('delete-post-btn')) handleDeletePost(button.dataset.id);
-        if (button.classList.contains('like-post-btn')) handleLikePost(button.dataset.id);
-        if (button.classList.contains('edit-post-btn')) handleEditPost(button.dataset.id);
-        if (button.classList.contains('comment-like-btn')) handleCommentLike(button.dataset.commentId);
-        if (button.classList.contains('comment-delete-btn')) handleCommentDelete(button.dataset.commentId);
-        if (button.classList.contains('comment-edit-btn')) handleCommentEdit(button.dataset.commentId, button.dataset.currentBody);
-        if (button.classList.contains('comment-reply-btn')) showReplyForm(button.dataset.commentId);
     });
 
-    document.body.addEventListener('submit', (e) => {
-        if (e.target.classList.contains('comment-form')) {
-            e.preventDefault();
-            handleCommentSubmit(e);
-        }
-        if (e.target.classList.contains('reply-form')) {
-            e.preventDefault();
-            const commentElement = e.target.closest('.comment');
-            const commentId = commentElement.querySelector('.small-btn[data-comment-id]').dataset.commentId;
-            handleCommentSubmit(e, commentId);
-        }
-    });
+   document.body.addEventListener('submit', (e) => {
+    const form = e.target;
+    
+    // Top-level comments ke liye
+    if (form.classList.contains('comment-form')) {
+        e.preventDefault();
+        const button = form.querySelector('button');
+        // Helper function ka istemal karein
+        handleAsyncClick(button, () => handleCommentSubmit(e));
+    }
+    
+    // Replies ke liye
+    if (form.classList.contains('reply-form')) {
+        e.preventDefault();
+        const button = form.querySelector('button');
+        const commentId = form.closest('.comment').querySelector('[data-comment-id]').dataset.commentId;
+        // Helper function ka istemal karein
+        handleAsyncClick(button, () => handleCommentSubmit(e, commentId));
+    }
+});
 
     // --- INITIALIZE ---
     checkAuth();

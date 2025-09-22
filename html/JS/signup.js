@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
+  const signupButton = signupForm.querySelector("button");
   const API_URL = "https://blogbackend-new.onrender.com/api/v1";
 
   signupForm.addEventListener("submit", async (e) => {
@@ -16,7 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Signup data ko store karein taaki OTP verification ke baad use kar sakein
+    // Disable the button and show the loading spinner
+    signupButton.disabled = true;
+    signupButton.classList.add("loading");
+
     const signupData = { firstName, lastName, email, password, confirmPassword };
     localStorage.setItem("pendingSignup", JSON.stringify(signupData));
 
@@ -37,6 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Error sending OTP:", error);
       alert("An error occurred. Please try again.");
+    } finally {
+        // Re-enable the button and hide the spinner
+        signupButton.disabled = false;
+        signupButton.classList.remove("loading");
     }
   });
 });

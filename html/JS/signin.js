@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const signinForm = document.getElementById("signin-form");
+  const signinButton = signinForm.querySelector("button");
 
   if (localStorage.getItem("token")) {
     window.location.href = "hom.html"; 
@@ -11,6 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("pass").value;
+
+    // Button ko disable karein aur spinner dikhayein
+    signinButton.disabled = true;
+    signinButton.classList.add("loading");
 
     try {
       const response = await fetch("https://blogbackend-new.onrender.com/api/v1/auth/login", {
@@ -30,6 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       alert("An error occurred during login.");
+    } finally {
+      // Button ko wapas normal state me laayein
+      signinButton.disabled = false;
+      signinButton.classList.remove("loading");
     }
   });
 });
