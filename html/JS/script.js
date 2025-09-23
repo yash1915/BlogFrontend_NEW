@@ -228,36 +228,52 @@ const renderPosts = (posts, append = false) => {
         }
     };
 
-    // b/frontend/html/JS/script.js
-
 const handleCreatePost = (e) => {
     e.preventDefault();
     const formData = new FormData(createPostForm);
     const createButton = createPostForm.querySelector('button');
 
-    // Select the progress bar elements from your HTML
+    // Select all the UI elements
     const progressBarContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
+    const cancelBtn = document.getElementById('cancel-upload-btn'); // Get the cancel button
     
-    // Use XMLHttpRequest (XHR) because it supports upload progress events
     const xhr = new XMLHttpRequest();
+
+    // --- LOGIC FOR THE CANCEL BUTTON ---
+    const cancelUpload = () => xhr.abort();
+    cancelBtn.addEventListener('click', cancelUpload);
+
+    // This function will run when xhr.abort() is called
+    xhr.onabort = () => {
+        alert("Upload has been cancelled.");
+        // Reset the entire UI
+        createButton.disabled = false;
+        createButton.classList.remove("loading");
+        progressBarContainer.classList.add('hidden');
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+        // Remove the event listener to prevent memory leaks
+        cancelBtn.removeEventListener('click', cancelUpload);
+    };
     
+    // --- REST OF THE UPLOAD LOGIC ---
     xhr.open("POST", `${API_URL}/posts/create`, true);
     xhr.setRequestHeader("Authorization", `Bearer ${getToken()}`);
 
-    // This event listener updates the progress bar as the file uploads
     xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
             const percentComplete = Math.round((event.loaded / event.total) * 100);
-            progressBarContainer.classList.remove('hidden'); // Show the progress bar
+            progressBarContainer.classList.remove('hidden'); // Show progress bar and cancel button
             progressBar.style.width = percentComplete + '%';
             progressBar.textContent = percentComplete + '%';
         }
     };
 
-    // This runs when the upload is complete (whether it succeeded or failed)
     xhr.onload = () => {
-        // Re-enable the button and hide/reset the progress bar
+        // Remove the event listener since the upload is complete
+        cancelBtn.removeEventListener('click', cancelUpload);
+        
         createButton.disabled = false;
         createButton.classList.remove("loading");
         progressBarContainer.classList.add('hidden');
@@ -265,26 +281,25 @@ const handleCreatePost = (e) => {
         progressBar.textContent = '0%';
 
         if (xhr.status >= 200 && xhr.status < 300) {
-            // If the upload was successful
             createPostForm.reset();
-            hasMorePosts = true; // Reset pagination state
-            loadPosts(1);      // Reload posts to see the new one
+            hasMorePosts = true;
+            loadPosts(1);
         } else {
-            // If the server returned an error
             const errorData = JSON.parse(xhr.responseText);
             alert("Could not create post: " + (errorData.error || "Server error"));
         }
     };
 
-    // This handles network errors (e.g., no internet connection)
     xhr.onerror = () => {
-        alert("An error occurred during the upload. Please check your network connection.");
+        // Also remove listener on error
+        cancelBtn.removeEventListener('click', cancelUpload);
+        alert("An error occurred during the upload.");
         createButton.disabled = false;
         createButton.classList.remove("loading");
         progressBarContainer.classList.add('hidden');
     };
 
-    // Disable the button before sending the request
+    // Start the upload
     createButton.disabled = true;
     createButton.classList.add("loading");
     xhr.send(formData);
