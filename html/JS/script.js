@@ -98,6 +98,10 @@ const handleAsyncClick = async (button, asyncFunction) => {
             const authorTag = isPostAuthorComment ? `<span class="owner-tag">(Author)</span>` : '';
 
             return `
+            ${isCommentAuthor ? `
+    <button class="comment-edit-btn small-btn" data-comment-id="${comment._id}" data-current-body="${escapeHTML(comment.body)}"><i class="fa-solid fa-pen-to-square"></i><span class="action-button-text"> Edit</span></button>
+    <button class="comment-delete-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i><span class="action-button-text"> Delete</span></button>
+` : ''}
                 <div class="comment ${isReply ? 'reply' : ''} ${isPostAuthorComment ? 'owner-comment' : ''}">
                     <p><strong>${escapeHTML(comment.user.firstName)} ${escapeHTML(comment.user.lastName)} ${authorTag}:</strong> ${escapeHTML(comment.body)}</p>
                     <div class="comment-actions">
