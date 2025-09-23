@@ -228,52 +228,61 @@ const renderPosts = (posts, append = false) => {
         }
     };
 
+
+
 const handleCreatePost = (e) => {
     e.preventDefault();
     const formData = new FormData(createPostForm);
     const createButton = createPostForm.querySelector('button[type="submit"]');
-
-    // Select all the UI elements
     const progressBarContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
-    const cancelBtn = document.getElementById('cancel-upload-btn'); // Get the cancel button
+    const cancelBtn = document.getElementById('cancel-upload-btn');
     
     const xhr = new XMLHttpRequest();
+    
+    // --- THIS IS THE FIX ---
+    // 1. Add a flag to prevent the alert from showing twice
+    let isCancelled = false;
 
-    // --- LOGIC FOR THE CANCEL BUTTON ---
-    const cancelUpload = () => xhr.abort();
+    const cancelUpload = () => {
+        if (!isCancelled) { // Only abort if not already cancelled
+            xhr.abort();
+        }
+    };
     cancelBtn.addEventListener('click', cancelUpload);
 
-    // This function will run when xhr.abort() is called
     xhr.onabort = () => {
-        alert("Upload has been cancelled.");
-        // Reset the entire UI
-        createButton.disabled = false;
-        createButton.classList.remove("loading");
-        progressBarContainer.classList.add('hidden');
-        progressBar.style.width = '0%';
-        progressBar.textContent = '0%';
-        // Remove the event listener to prevent memory leaks
-        cancelBtn.removeEventListener('click', cancelUpload);
+        // 2. Check the flag before showing the alert
+        if (!isCancelled) {
+            isCancelled = true; // Set the flag so this code doesn't run again
+            alert("Upload has been cancelled.");
+            
+            // Reset the UI
+            createButton.disabled = false;
+            createButton.classList.remove("loading");
+            progressBarContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            cancelBtn.removeEventListener('click', cancelUpload);
+        }
     };
     
-    // --- REST OF THE UPLOAD LOGIC ---
+    // --- The rest of the function remains the same ---
     xhr.open("POST", `${API_URL}/posts/create`, true);
     xhr.setRequestHeader("Authorization", `Bearer ${getToken()}`);
 
     xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
             const percentComplete = Math.round((event.loaded / event.total) * 100);
-            progressBarContainer.classList.remove('hidden'); // Show progress bar and cancel button
+            progressBarContainer.classList.remove('hidden');
             progressBar.style.width = percentComplete + '%';
             progressBar.textContent = percentComplete + '%';
         }
     };
 
     xhr.onload = () => {
-        // Remove the event listener since the upload is complete
         cancelBtn.removeEventListener('click', cancelUpload);
-        
+        // ... (rest of onload is the same)
         createButton.disabled = false;
         createButton.classList.remove("loading");
         progressBarContainer.classList.add('hidden');
@@ -291,15 +300,14 @@ const handleCreatePost = (e) => {
     };
 
     xhr.onerror = () => {
-        // Also remove listener on error
         cancelBtn.removeEventListener('click', cancelUpload);
+        // ... (rest of onerror is the same)
         alert("An error occurred during the upload.");
         createButton.disabled = false;
         createButton.classList.remove("loading");
         progressBarContainer.classList.add('hidden');
     };
 
-    // Start the upload
     createButton.disabled = true;
     createButton.classList.add("loading");
     xhr.send(formData);
