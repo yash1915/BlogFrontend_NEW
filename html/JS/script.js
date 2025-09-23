@@ -121,10 +121,6 @@ const timeAgo = (dateString) => {
             const authorTag = isPostAuthorComment ? `<span class="owner-tag">(Author)</span>` : '';
 
             return `
-            ${isCommentAuthor ? `
-    <button class="comment-edit-btn small-btn" data-comment-id="${comment._id}" data-current-body="${escapeHTML(comment.body)}"><i class="fa-solid fa-pen-to-square"></i><span class="action-button-text"> Edit</span></button>
-    <button class="comment-delete-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i><span class="action-button-text"> Delete</span></button>
-` : ''}
                 <div class="comment ${isReply ? 'reply' : ''} ${isPostAuthorComment ? 'owner-comment' : ''}">
                     <div class="comment-header">
                 <strong>${escapeHTML(comment.user.firstName)} ${escapeHTML(comment.user.lastName)} ${authorTag}</strong>
@@ -139,7 +135,7 @@ const timeAgo = (dateString) => {
                         ${!isReply ? `<button class="comment-reply-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-reply"></i> Reply</button>` : ''}
                         ${isCommentAuthor ? `
                             <button class="comment-edit-btn small-btn" data-comment-id="${comment._id}" data-current-body="${escapeHTML(comment.body)}"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            <button class="comment-delete-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i> Delete</button>
+                            <button class="comment-delete-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i></button>
                         ` : ''}
                     </div>
                     <div class="reply-form-container" id="reply-form-for-${comment._id}"></div>
