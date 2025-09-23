@@ -58,11 +58,28 @@ const handleAsyncClick = async (button, asyncFunction) => {
         p.textContent = str;
         return p.innerHTML;
     };
-    //  HELPER FUNCTION TO FORMAT THE DATE
-    const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-    };
+     //  HELPER FUNCTION TO FORMAT THE DATE
+const timeAgo = (dateString) => {
+    const now = new Date();
+    const past = new Date(dateString);
+    const seconds = Math.floor((now - past) / 1000);
+
+    let interval = seconds / 31536000; // Years
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    
+    interval = seconds / 2592000; // Months
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    
+    interval = seconds / 86400; // Days
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    
+    interval = seconds / 3600; // Hours
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    
+    interval = seconds / 60; // Minutes
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+    
+    return Math.floor(seconds) + " seconds ago";
 
     // --- AUTH ---
     const checkAuth = () => {
@@ -104,7 +121,10 @@ const handleAsyncClick = async (button, asyncFunction) => {
 
             return `
                 <div class="comment ${isReply ? 'reply' : ''} ${isPostAuthorComment ? 'owner-comment' : ''}">
-                    <p><strong>${escapeHTML(comment.user.firstName)} ${escapeHTML(comment.user.lastName)} ${authorTag}:</strong> ${escapeHTML(comment.body)}</p>
+                    <div class="comment-header">
+                <strong>${escapeHTML(comment.user.firstName)} ${escapeHTML(comment.user.lastName)} ${authorTag}</strong>
+                <span class="comment-date">· ${timeAgo(comment.createdAt)}</span>
+            </div>
                     <div class="comment-actions">
                         <div class="like-container">
                             <button class="comment-like-btn small-btn ${isCommentLiked ? 'liked' : ''}" data-comment-id="${comment._id}"><i class="fa-solid fa-thumbs-up"></i> (${comment.likes.length})</button>
