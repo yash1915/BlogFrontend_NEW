@@ -228,26 +228,70 @@ const timeAgo = (dateString) => {
         }
     };
 
-    const handleCreatePost = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(createPostForm);
-        try {
-            const res = await fetch(`${API_URL}/posts/create`, {
-                method: "POST",
-                headers: getAuthHeaders(true),
-                body: formData
-            });
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || "Failed to create post");
-            }
-            createPostForm.reset();
-            loadPosts();
-        } catch(err) {
-            console.error("Error creating post:", err);
-            alert("Could not create post: " + err.message);
-        } 
+    // b/frontend/html/JS/script.js
+
+const handleCreatePost = (e) => {
+    e.preventDefault();
+    const formData = new FormData(createPostForm);
+    const createButton = createPostForm.querySelector('button');
+
+    // Select the progress bar elements from your HTML
+    const progressBarContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    
+    // Use XMLHttpRequest (XHR) because it supports upload progress events
+    const xhr = new XMLHttpRequest();
+    
+    xhr.open("POST", `${API_URL}/posts/create`, true);
+    xhr.setRequestHeader("Authorization", `Bearer ${getToken()}`);
+
+    // This event listener updates the progress bar as the file uploads
+    xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            progressBarContainer.classList.remove('hidden'); // Show the progress bar
+            progressBar.style.width = percentComplete + '%';
+            progressBar.textContent = percentComplete + '%';
+        }
     };
+
+    // This runs when the upload is complete (whether it succeeded or failed)
+    xhr.onload = () => {
+        // Re-enable the button and hide/reset the progress bar
+        createButton.disabled = false;
+        createButton.classList.remove("loading");
+        progressBarContainer.classList.add('hidden');
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+            // If the upload was successful
+            createPostForm.reset();
+            hasMorePosts = true; // Reset pagination state
+            loadPosts(1);      // Reload posts to see the new one
+        } else {
+            // If the server returned an error
+            const errorData = JSON.parse(xhr.responseText);
+            alert("Could not create post: " + (errorData.error || "Server error"));
+        }
+    };
+
+    // This handles network errors (e.g., no internet connection)
+    xhr.onerror = () => {
+        alert("An error occurred during the upload. Please check your network connection.");
+        createButton.disabled = false;
+        createButton.classList.remove("loading");
+        progressBarContainer.classList.add('hidden');
+    };
+
+    // Disable the button before sending the request
+    createButton.disabled = true;
+    createButton.classList.add("loading");
+    xhr.send(formData);
+};
+
+// Also, make sure your form's submit event listener calls this function directly
+createPostForm.addEventListener("submit", handleCreatePost);
     const handleEditPost = (postId) => {
         
         const newTitle = prompt("Enter the new title:");
