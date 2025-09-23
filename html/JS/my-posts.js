@@ -147,7 +147,7 @@ const timeAgo = (dateString) => {
                         ${post.likes.length > 0 ? `<div class="liked-by-tooltip">${likedByNames}</div>` : ''}
                     </div>
                     <button class="edit-post-btn" data-id="${post._id}">Edit</button>
-                    <button class="delete-post-btn" data-id="${post._id}"></button>
+                    <button class="delete-post-btn" data-id="${post._id}">Delete</button>
                 </div>
                 <div class="comments-section">
                     <h3>Comments</h3>
