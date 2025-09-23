@@ -415,6 +415,10 @@ nav button:hover {
     .post-actions {
         font-size: 0.9rem;
     }
+     /* Hide text for action buttons on mobile to save space */
+    .action-button-text {
+        display: none;
+    }
 }
 /* --- Loading State for Buttons --- */
 button.loading {
@@ -443,4 +447,9 @@ button.loading .button-text {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+/* Add this new rule to fix long comment overflow */
+.comment p {
+    overflow-wrap: break-word;
+    word-break: break-word; /* Use break-word for better wrapping */
 }
