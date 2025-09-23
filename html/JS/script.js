@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
     const API_URL = "https://blogbackend-new.onrender.com/api/v1";
     let currentUser = null;
+     // ---  NEW VARIABLES ---
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMorePosts = true;
     // --- BUTTON HELPER ---(ye function sabse niche use hua hai)
 const handleAsyncClick = async (button, asyncFunction) => {
     if (!button || button.disabled) return;
@@ -97,21 +101,24 @@ const timeAgo = (dateString) => {
     };
 
     // --- RENDER FUNCTIONS ---
-    const renderPosts = (posts) => { 
+    const renderPosts = (posts, append = false) => {
+    if (!append) { // If it's the first page, clear the container
         postsContainer.innerHTML = "";
-        posts.forEach(post => {
-            const postDiv = document.createElement("div");
-            postDiv.className = "post";
-            postDiv.innerHTML = `
-                ${post.postMedia ? `<img src="${post.postMedia}" alt="Post thumbnail" class="post-thumbnail">` : ''}
-                <h3>${escapeHTML(post.title)}</h3>
-                <p>by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)}</p>
-                <p>${escapeHTML(post.body.substring(0, 150))}...</p>
-                <button class="view-post-btn" data-id="${post._id}">View Details</button>
-            `;
-            postsContainer.appendChild(postDiv);
-        });
-    };
+    }
+    posts.forEach(post => {
+        const postDiv = document.createElement("div");
+        postDiv.className = "post";
+        // The line with the author's name has been updated to include the date
+        postDiv.innerHTML = `
+            ${post.postMedia ? `<img src="${post.postMedia}" alt="Post thumbnail" class="post-thumbnail">` : ''}
+            <h3>${escapeHTML(post.title)}</h3>
+            <p>by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)} <span class="post-date">· ${formatDate(post.createdAt)}</span></p>
+            <p>${escapeHTML(post.body.substring(0, 150))}...</p>
+            <button class="view-post-btn" data-id="${post._id}">View Details</button>
+        `;
+        postsContainer.appendChild(postDiv);
+    });
+};
     const renderPostDetail = (post) => {
         const isAuthor = post.author._id === currentUser._id;
         const isLiked = post.likes.some(like => like._id === currentUser._id);
@@ -173,18 +180,41 @@ const timeAgo = (dateString) => {
     };
 
     // --- API & DOM MANIPULATION ---
-    const loadPosts = async () => {
+   const loadPosts = async (page = 1) => {
+    // Prevent multiple requests while one is already in progress or if there are no more posts
+    if (isLoading || (!hasMorePosts && page > 1)) return;
+    
+    isLoading = true;
+    if(page === 1) {
         showSection('home');
-        try {
-            const res = await fetch(`${API_URL}/posts`);
-            if (!res.ok) throw new Error("Could not fetch posts.");
-            const data = await res.json();
-            renderPosts(data.posts);
-        } catch (err) {
-            console.error("Error loading posts:", err);
-            alert("Error loading posts.");
+    }
+    // You can add a loading spinner indicator here if you like
+
+    try {
+        // Fetch posts for a specific page. The backend now supports this.
+        const res = await fetch(`${API_URL}/posts?page=${page}&limit=10`);
+        if (!res.ok) throw new Error("Could not fetch posts.");
+        
+        const data = await res.json();
+        
+        // Render the posts, appending them if it's not the first page
+        renderPosts(data.posts, page > 1);
+
+        // Update the state based on the response from the server
+        currentPage = data.currentPage;
+        if (currentPage >= data.totalPages) {
+            hasMorePosts = false;
+            // You could display a "No more posts" message to the user here
         }
-    };
+
+    } catch (err) {
+        console.error("Error loading posts:", err);
+        alert("Error loading posts.");
+    } finally {
+        isLoading = false;
+        // Hide the loading spinner indicator here
+    }
+};
     const openPost = async (postId) => {
         
         try {
@@ -494,6 +524,14 @@ createPostForm.addEventListener("submit", (e) => {
     if (button.classList.contains('comment-reply-btn')) {
         showReplyForm(button.dataset.commentId);
     }
+    window.addEventListener('scroll', () => {
+    // Check if the user has scrolled to the bottom of the page
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200) {
+        if (hasMorePosts && !isLoading) {
+            loadPosts(currentPage + 1); // Load the next page
+        }
+    }
+});
 
 
         // Desktop par Like ke liye click event
