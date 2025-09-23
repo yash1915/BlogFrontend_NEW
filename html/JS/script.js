@@ -42,6 +42,7 @@ const handleAsyncClick = async (button, asyncFunction) => {
     const postsContainer = document.getElementById("posts-container");
     const createPostForm = document.getElementById("create-post-form");
     const createPostButton = createPostForm.querySelector("button");
+    const postsLoader = document.getElementById('posts-loader');
 
     // --- UTILS ---
     const getToken = () => localStorage.getItem("token");
@@ -181,38 +182,49 @@ const renderPosts = (posts, append = false) => {
 
     // --- API & DOM MANIPULATION ---
    const loadPosts = async (page = 1) => {
-    // Prevent multiple requests while one is already in progress or if there are no more posts
+    // Prevent multiple requests while one is in progress or if there are no more posts
     if (isLoading || (!hasMorePosts && page > 1)) return;
     
     isLoading = true;
-    if(page === 1) {
+    
+    // On the first page load, prepare the UI and show the loader
+    if (page === 1) {
         showSection('home');
+        postsContainer.innerHTML = ''; // Clear any previous content
+        postsLoader.classList.remove('hidden'); // Show the "Loading posts..." message
     }
-    // You can add a loading spinner indicator here if you like
 
     try {
-        // Fetch posts for a specific page. The backend now supports this.
+        // Fetch posts for the specific page
         const res = await fetch(`${API_URL}/posts?page=${page}&limit=10`);
         if (!res.ok) throw new Error("Could not fetch posts.");
         
         const data = await res.json();
         
-        // Render the posts, appending them if it's not the first page
-        renderPosts(data.posts, page > 1);
+        // Hide the loader once posts have been fetched
+        postsLoader.classList.add('hidden');
 
-        // Update the state based on the response from the server
+        // Check if there are any posts to display
+        if (data.posts.length === 0 && page === 1) {
+            postsContainer.innerHTML = "<p>No posts found. Create one to get started!</p>";
+        } else {
+            // Render the posts, appending them if it's not the first page
+            renderPosts(data.posts, page > 1);
+        }
+
+        // Update the pagination state
         currentPage = data.currentPage;
         if (currentPage >= data.totalPages) {
             hasMorePosts = false;
-            // You could display a "No more posts" message to the user here
         }
 
     } catch (err) {
+        // Also hide the loader if an error occurs
+        postsLoader.classList.add('hidden');
         console.error("Error loading posts:", err);
         alert("Error loading posts.");
     } finally {
         isLoading = false;
-        // Hide the loading spinner indicator here
     }
 };
     const openPost = async (postId) => {
