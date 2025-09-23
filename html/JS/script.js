@@ -112,7 +112,7 @@ const timeAgo = (dateString) => {
         postDiv.innerHTML = `
             ${post.postMedia ? `<img src="${post.postMedia}" alt="Post thumbnail" class="post-thumbnail">` : ''}
             <h3>${escapeHTML(post.title)}</h3>
-            <p>by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)} <span class="post-date">· ${formatDate(post.createdAt)}</span></p>
+            <p>by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)} <span class="post-date">· ${timeAgo(post.createdAt)}</span></p>
             <p>${escapeHTML(post.body.substring(0, 150))}...</p>
             <button class="view-post-btn" data-id="${post._id}">View Details</button>
         `;
