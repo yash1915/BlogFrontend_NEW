@@ -80,6 +80,7 @@ const timeAgo = (dateString) => {
     if (interval > 1) return Math.floor(interval) + " minutes ago";
     
     return Math.floor(seconds) + " seconds ago";
+};
 
     // --- AUTH ---
     const checkAuth = () => {
