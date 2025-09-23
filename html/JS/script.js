@@ -58,29 +58,11 @@ const handleAsyncClick = async (button, asyncFunction) => {
         p.textContent = str;
         return p.innerHTML;
     };
-     //  HELPER FUNCTION TO FORMAT THE DATE
-const timeAgo = (dateString) => {
-    const now = new Date();
-    const past = new Date(dateString);
-    const seconds = Math.floor((now - past) / 1000);
-
-    let interval = seconds / 31536000; // Years
-    if (interval > 1) return Math.floor(interval) + " years ago";
-    
-    interval = seconds / 2592000; // Months
-    if (interval > 1) return Math.floor(interval) + " months ago";
-    
-    interval = seconds / 86400; // Days
-    if (interval > 1) return Math.floor(interval) + " days ago";
-    
-    interval = seconds / 3600; // Hours
-    if (interval > 1) return Math.floor(interval) + " hours ago";
-    
-    interval = seconds / 60; // Minutes
-    if (interval > 1) return Math.floor(interval) + " minutes ago";
-    
-    return Math.floor(seconds) + " seconds ago";
-};
+    //  HELPER FUNCTION TO FORMAT THE DATE
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    };
 
     // --- AUTH ---
     const checkAuth = () => {
@@ -121,11 +103,12 @@ const timeAgo = (dateString) => {
             const authorTag = isPostAuthorComment ? `<span class="owner-tag">(Author)</span>` : '';
 
             return `
+            ${isCommentAuthor ? `
+    <button class="comment-edit-btn small-btn" data-comment-id="${comment._id}" data-current-body="${escapeHTML(comment.body)}"><i class="fa-solid fa-pen-to-square"></i><span class="action-button-text"> Edit</span></button>
+    <button class="comment-delete-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i><span class="action-button-text"> Delete</span></button>
+` : ''}
                 <div class="comment ${isReply ? 'reply' : ''} ${isPostAuthorComment ? 'owner-comment' : ''}">
-                    <div class="comment-header">
-                <strong>${escapeHTML(comment.user.firstName)} ${escapeHTML(comment.user.lastName)} ${authorTag}</strong>
-                <span class="comment-date">· ${timeAgo(comment.createdAt)}</span>
-            </div>
+                    <p><strong>${escapeHTML(comment.user.firstName)} ${escapeHTML(comment.user.lastName)} ${authorTag}:</strong> ${escapeHTML(comment.body)}</p>
                     <div class="comment-actions">
                         <div class="like-container">
                             <button class="comment-like-btn small-btn ${isCommentLiked ? 'liked' : ''}" data-comment-id="${comment._id}"><i class="fa-solid fa-thumbs-up"></i> (${comment.likes.length})</button>
@@ -134,7 +117,7 @@ const timeAgo = (dateString) => {
                         ${!isReply ? `<button class="comment-reply-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-reply"></i> Reply</button>` : ''}
                         ${isCommentAuthor ? `
                             <button class="comment-edit-btn small-btn" data-comment-id="${comment._id}" data-current-body="${escapeHTML(comment.body)}"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            <button class="comment-delete-btn small-btn"data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i></button>
+                            <button class="comment-delete-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i> Delete</button>
                         ` : ''}
                     </div>
                     <div class="reply-form-container" id="reply-form-for-${comment._id}"></div>
@@ -150,7 +133,7 @@ const timeAgo = (dateString) => {
                 <button id="back-to-home-btn" class="back-btn">&larr; Back to Home</button>
                 <h2>${escapeHTML(post.title)}</h2>
                 <p class="author-info">by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)}
-                <span class="post-date">·  ${timeAgo(post.createdAt)}</span></p>
+                <span class="post-date">· Published on ${formatDate(post.createdAt)}</span></p>
                 ${post.postMedia ? (post.mediaType === 'video' ? `<video src="${post.postMedia}" controls class="post-media-full"></video>` : `<img src="${post.postMedia}" alt="${escapeHTML(post.title)}" class="post-media-full">`) : ''}
                 <p class="post-body">${escapeHTML(post.body)}</p>
                 <div class="post-actions">
