@@ -44,6 +44,11 @@ const handleAsyncClick = async (button, asyncFunction) => {
         p.textContent = str;
         return p.innerHTML;
     };
+    //  HELPER FUNCTION TO FORMAT THE DATE
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    };
 
     // --- AUTH ---
     const checkAuth = () => {
@@ -107,6 +112,8 @@ const handleAsyncClick = async (button, asyncFunction) => {
             <div class="post-detail-container" data-post-id="${post._id}">
                 <button class="back-to-summary-btn back-btn">&larr; Back to My Posts</button>
                 <h2>${escapeHTML(post.title)}</h2>
+                <p class="author-info">by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)}
+                <span class="post-date">· Published on ${formatDate(post.createdAt)}</span></p>
                 ${post.postMedia ? (post.mediaType === 'video' ? `<video src="${post.postMedia}" controls class="post-media-full"></video>` : `<img src="${post.postMedia}" alt="${escapeHTML(post.title)}" class="post-media-full">`) : ''}
                 <p class="post-body">${escapeHTML(post.body)}</p>
                 <div class="post-actions">
