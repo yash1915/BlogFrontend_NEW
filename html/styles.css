@@ -232,18 +232,17 @@ nav button:hover {
 
 /* --- Progress Bar Styles --- */
 .progress-container {
+    position: relative; /* Yeh zaroori hai */
+    display: flex;
+    align-items: center;
     width: 100%;
     background-color: var(--input-bg);
     border-radius: 8px;
-    overflow: hidden;
     margin-top: 1rem;
     border: 1px solid var(--border-color);
-    display: flex; /* Add this */
-    align-items: center; /* Add this */
-    gap: 1rem; /* Add this */
-    padding-right: 10px; /* Add some space for the button */
 }
 
+/* Progress bar mein koi badlav nahi hai, yeh waisa hi rahega */
 .progress-bar {
     width: 0%;
     height: 30px;
@@ -253,17 +252,22 @@ nav button:hover {
     color: white;
     font-weight: 600;
     transition: width 0.4s ease;
-    border-radius: 8px; /* Add this for a cleaner look */
+    border-radius: 8px;
 }
+
+/* === CANCEL BUTTON KE LIYE YEH NAYA CODE USE KAREIN === */
 .cancel-btn {
+    position: absolute; /* Button ko fix karne ke liye */
+    right: 10px;        /* Right side se 10px door */
+    z-index: 2;         /* Taaki yeh progress bar ke upar rahe */
+    
+    /* Baaki styles wahi rahenge */
     padding: 5px 15px;
     background-image: linear-gradient(to right, #e91e63 0%, #ff5252 51%, #e91e63 100%);
-    flex-shrink: 0; /* Prevents the button from shrinking */
     font-size: 0.9rem;
     text-transform: none;
     border-radius: 6px;
 }
-
 .hidden {
     display: none;
 }
