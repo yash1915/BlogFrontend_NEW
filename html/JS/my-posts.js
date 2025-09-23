@@ -140,7 +140,7 @@ const timeAgo = (dateString) => {
                 <button class="back-to-summary-btn back-btn">&larr; Back to My Posts</button>
                 <h2>${escapeHTML(post.title)}</h2>
                 <p class="author-info">by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)}
-                <span class="post-date">· ${timeAgo(post.createdAt)}</span></p>
+                <span class="post-date">·Published on ${timeAgo(post.createdAt)}</span></p>
                 ${post.postMedia ? (post.mediaType === 'video' ? `<video src="${post.postMedia}" controls class="post-media-full"></video>` : `<img src="${post.postMedia}" alt="${escapeHTML(post.title)}" class="post-media-full">`) : ''}
                 <p class="post-body">${escapeHTML(post.body)}</p>
                 <div class="post-actions">
