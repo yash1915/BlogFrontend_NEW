@@ -149,7 +149,8 @@ const timeAgo = (dateString) => {
             <div class="post-detail-container" data-post-id="${post._id}">
                 <button id="back-to-home-btn" class="back-btn">&larr; Back to Home</button>
                 <h2>${escapeHTML(post.title)}</h2>
-                <p class="author-info">by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)}</p>
+                <p class="author-info">by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)}
+                <span class="post-date">·  ${timeAgo(post.createdAt)}</span></p>
                 ${post.postMedia ? (post.mediaType === 'video' ? `<video src="${post.postMedia}" controls class="post-media-full"></video>` : `<img src="${post.postMedia}" alt="${escapeHTML(post.title)}" class="post-media-full">`) : ''}
                 <p class="post-body">${escapeHTML(post.body)}</p>
                 <div class="post-actions">
