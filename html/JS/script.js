@@ -551,14 +551,6 @@ document.getElementById("profile-btn").addEventListener("click", () => {
 // Logout Button (Yeh bhi page navigate karta hai)
 document.getElementById("logout-btn").addEventListener("click", logout);
 
-// Create Post Form Submission
-createPostForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const submitButton = createPostForm.querySelector('button');
-    
-    // Yahan hum helper function ka istemal kar rahe hain
-    handleAsyncClick(submitButton, () => handleCreatePost(e));
-});
 
     document.body.addEventListener('click', (e) => {
              const button = e.target.closest('button'); // Clicked element ya uske parent button ko dhoondein
