@@ -231,7 +231,7 @@ const renderPosts = (posts, append = false) => {
 const handleCreatePost = (e) => {
     e.preventDefault();
     const formData = new FormData(createPostForm);
-    const createButton = createPostForm.querySelector('button');
+    const createButton = createPostForm.querySelector('button[type="submit"]');
 
     // Select all the UI elements
     const progressBarContainer = document.getElementById('progress-container');
