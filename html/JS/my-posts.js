@@ -49,6 +49,10 @@ const timeAgo = (dateString) => {
     const now = new Date();
     const past = new Date(dateString);
     const seconds = Math.floor((now - past) / 1000);
+    // If the time difference is negative or very small, show "just now"
+    if (seconds < 5) {
+        return "just now";
+    }
 
     let interval = seconds / 31536000; // Years
     if (interval > 1) return Math.floor(interval) + " years ago";
