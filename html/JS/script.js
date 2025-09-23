@@ -108,7 +108,7 @@ const handleAsyncClick = async (button, asyncFunction) => {
                         ${!isReply ? `<button class="comment-reply-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-reply"></i> Reply</button>` : ''}
                         ${isCommentAuthor ? `
                             <button class="comment-edit-btn small-btn" data-comment-id="${comment._id}" data-current-body="${escapeHTML(comment.body)}"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            <button class="comment-delete-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i> Delete</button>
+                            <button class="comment-delete-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i> </button>
                         ` : ''}
                     </div>
                     <div class="reply-form-container" id="reply-form-for-${comment._id}"></div>
@@ -128,7 +128,7 @@ const handleAsyncClick = async (button, asyncFunction) => {
                 <p class="post-body">${escapeHTML(post.body)}</p>
                 <div class="post-actions">
                     <div class="like-container"><button class="like-post-btn ${isLiked ? 'liked' : ''}" data-id="${post._id}"><i class="fa-solid fa-thumbs-up"></i> (${post.likes.length})</button>${post.likes.length > 0 ? `<div class="liked-by-tooltip">${likedByNames}</div>` : ''}</div>
-                    ${isAuthor ? `<button class="edit-post-btn" data-id="${post._id}">Edit</button><button class="delete-post-btn" data-id="${post._id}"></button>` : ''}
+                    ${isAuthor ? `<button class="edit-post-btn" data-id="${post._id}">Edit</button><button class="delete-post-btn" data-id="${post._id}">Delete</button>` : ''}
                 </div>
                 <div class="comments-section">
                     <h3>Comments</h3>
