@@ -215,6 +215,11 @@ nav button:hover {
     margin-bottom: 1rem;
     opacity: 0.9;
 }
+.post-date {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    font-style: italic;
+}
 
 .post-thumbnail {
     width: 100%;
