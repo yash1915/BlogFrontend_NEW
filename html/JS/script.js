@@ -100,15 +100,15 @@ const timeAgo = (dateString) => {
         window.location.href = "signin.html";
     };
 
-    // --- RENDER FUNCTIONS ---
-    const renderPosts = (posts, append = false) => {
+    // --- RENDER FUNCTIONS --
+
+const renderPosts = (posts, append = false) => { 
     if (!append) { // If it's the first page, clear the container
         postsContainer.innerHTML = "";
     }
     posts.forEach(post => {
         const postDiv = document.createElement("div");
         postDiv.className = "post";
-        // The line with the author's name has been updated to include the date
         postDiv.innerHTML = `
             ${post.postMedia ? `<img src="${post.postMedia}" alt="Post thumbnail" class="post-thumbnail">` : ''}
             <h3>${escapeHTML(post.title)}</h3>
@@ -162,7 +162,7 @@ const timeAgo = (dateString) => {
                 <button id="back-to-home-btn" class="back-btn">&larr; Back to Home</button>
                 <h2>${escapeHTML(post.title)}</h2>
                 <p class="author-info">by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)}
-                <span class="post-date">·  ${timeAgo(post.createdAt)}</span></p>
+                <span class="post-date">·Published on ${timeAgo(post.createdAt)}</span></p>
                 ${post.postMedia ? (post.mediaType === 'video' ? `<video src="${post.postMedia}" controls class="post-media-full"></video>` : `<img src="${post.postMedia}" alt="${escapeHTML(post.title)}" class="post-media-full">`) : ''}
                 <p class="post-body">${escapeHTML(post.body)}</p>
                 <div class="post-actions">
