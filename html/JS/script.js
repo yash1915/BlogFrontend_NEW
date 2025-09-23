@@ -108,7 +108,7 @@ const handleAsyncClick = async (button, asyncFunction) => {
                         ${!isReply ? `<button class="comment-reply-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-reply"></i> Reply</button>` : ''}
                         ${isCommentAuthor ? `
                             <button class="comment-edit-btn small-btn" data-comment-id="${comment._id}" data-current-body="${escapeHTML(comment.body)}"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            <button class="comment-delete-btn small-btn" data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i></button>
+                            <button class="comment-delete-btn small-btn"data-comment-id="${comment._id}"><i class="fa-solid fa-trash"></i></button>
                         ` : ''}
                     </div>
                     <div class="reply-form-container" id="reply-form-for-${comment._id}"></div>
