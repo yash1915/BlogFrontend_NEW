@@ -229,6 +229,28 @@ nav button:hover {
     margin-bottom: 1rem;
 }
 
+
+/* --- Progress Bar Styles --- */
+.progress-container {
+    width: 100%;
+    background-color: var(--input-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.progress-bar {
+    width: 0%;
+    height: 30px;
+    background-color: var(--secondary-color);
+    text-align: center;
+    line-height: 30px;
+    color: white;
+    font-weight: 600;
+    transition: width 0.4s ease;
+}
+
 .hidden {
     display: none;
 }
