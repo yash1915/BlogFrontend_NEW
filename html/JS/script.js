@@ -103,15 +103,27 @@ const timeAgo = (dateString) => {
 
     // --- RENDER FUNCTIONS --
 
-const renderPosts = (posts, append = false) => { 
-    if (!append) { // If it's the first page, clear the container
+const renderPosts = (posts, append = false) => {
+    if (!append) {
         postsContainer.innerHTML = "";
     }
     posts.forEach(post => {
         const postDiv = document.createElement("div");
         postDiv.className = "post";
+
+        let thumbnailHTML = '';
+        if (post.postMedia) {
+            if (post.mediaType === 'video') {
+                thumbnailHTML = `<div class="post-thumbnail-icon"><i class="fa-solid fa-film"></i><span> Video Post</span></div>`;
+            } else if (post.mediaType === 'audio') { // Audio ke liye naya condition
+                thumbnailHTML = `<div class="post-thumbnail-icon"><i class="fa-solid fa-music"></i><span> Audio Post</span></div>`;
+            } else {
+                thumbnailHTML = `<img src="${post.postMedia}" alt="Post thumbnail" class="post-thumbnail">`;
+            }
+        }
+
         postDiv.innerHTML = `
-            ${post.postMedia ? `<img src="${post.postMedia}" alt="Post thumbnail" class="post-thumbnail">` : ''}
+            ${thumbnailHTML}
             <h3>${escapeHTML(post.title)}</h3>
             <p>by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)} <span class="post-date">· ${timeAgo(post.createdAt)}</span></p>
             <p>${escapeHTML(post.body.substring(0, 150))}...</p>
@@ -159,13 +171,18 @@ const renderPosts = (posts, append = false) => {
         };
 
         sections.detail.innerHTML = `
-            <div class="post-detail-container" data-post-id="${post._id}">
-                <button id="back-to-home-btn" class="back-btn">&larr; Back to Home</button>
-                <h2>${escapeHTML(post.title)}</h2>
-                <p class="author-info">by ${escapeHTML(post.author.firstName)} ${escapeHTML(post.author.lastName)}
-                <span class="post-date">·Published on ${timeAgo(post.createdAt)}</span></p>
-                ${post.postMedia ? (post.mediaType === 'video' ? `<video src="${post.postMedia}" controls class="post-media-full"></video>` : `<img src="${post.postMedia}" alt="${escapeHTML(post.title)}" class="post-media-full">`) : ''}
-                <p class="post-body">${escapeHTML(post.body)}</p>
+           <div class="post-detail-container" data-post-id="${post._id}">
+        <button id="back-to-home-btn" class="back-btn">&larr; Back to Home</button>
+        <h2>${escapeHTML(post.title)}</h2>
+        <p class="author-info">by ${escapeHTML(post.author.firstName)}...<span class="post-date">· Published on ${timeAgo(post.createdAt)}</span></p>
+        
+        ${post.postMedia ? (
+            post.mediaType === 'video' ? `<video src="${post.postMedia}" controls class="post-media-full"></video>` :
+            post.mediaType === 'audio' ? `<audio src="${post.postMedia}" controls class="post-media-full"></audio>` : // Audio player ke liye naya code
+            `<img src="${post.postMedia}" alt="${escapeHTML(post.title)}" class="post-media-full">`
+        ) : ''}
+        
+        <p class="post-body">${escapeHTML(post.body)}</p>
                 <div class="post-actions">
                     <div class="like-container"><button class="like-post-btn ${isLiked ? 'liked' : ''}" data-id="${post._id}"><i class="fa-solid fa-thumbs-up"></i> (${post.likes.length})</button>${post.likes.length > 0 ? `<div class="liked-by-tooltip">${likedByNames}</div>` : ''}</div>
                     ${isAuthor ? `<button class="edit-post-btn" data-id="${post._id}">Edit</button><button class="delete-post-btn" data-id="${post._id}">Delete</button>` : ''}
