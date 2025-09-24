@@ -372,7 +372,7 @@ createPostForm.addEventListener("submit", handleCreatePost);
         try {
             const res = await fetch(`${API_URL}/posts/${postId}`, { method: 'DELETE', headers: getAuthHeaders() });
             if (!res.ok) throw new Error("Failed to delete post");
-            loadPosts();
+            loadPosts(1);
         } catch (err) {
             console.error("Error deleting post:", err);
             alert("Could not delete post.");
