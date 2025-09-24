@@ -229,15 +229,31 @@ const timeAgo = (dateString) => {
         }
     };
 
-    const handleDeletePost = async (postId) => {
-        if (!confirm("Are you sure you want to delete this post?")) return;
-        try {
-            await fetch(`${API_URL}/posts/${postId}`, { method: 'DELETE', headers: getAuthHeaders() });
-            window.location.reload();
-        } catch (err) {
-            alert("Could not delete post.");
-        }
-    };
+   // b/frontend/html/JS/my-posts.js
+
+const handleDeletePost = async (postId) => {
+    if (!confirm("Are you sure you want to delete this post?")) return;
+    try {
+        const res = await fetch(`${API_URL}/posts/${postId}`, { 
+            method: 'DELETE', 
+            headers: getAuthHeaders() 
+        });
+
+        if (!res.ok) throw new Error("Failed to delete post");
+
+        // --- THIS IS THE UPDATED LOGIC ---
+        // Instead of reloading the whole page, go back to the post list
+        alert("Post deleted successfully.");
+        detailSection.classList.add('hidden');
+        summarySection.classList.remove('hidden');
+        await loadPostSummaries(); // Refresh the list of posts
+        // ------------------------------------
+        
+    } catch (err) {
+        console.error("Error deleting post:", err);
+        alert("Could not delete post.");
+    }
+};
 
     const handleLikePost = async (postId) => {
     const postElement = document.querySelector(`[data-post-id="${postId}"]`);
