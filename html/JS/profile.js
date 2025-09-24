@@ -12,10 +12,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- UTILS ---
     const getToken = () => localStorage.getItem("token");
-    const getAuthHeaders = () => ({
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${getToken()}`
-    });
+   const getAuthHeaders = () => {
+    const headers = new Headers(); // Naya Headers object banayein
+    headers.append("Authorization", `Bearer ${getToken()}`); // Sirf Authorization header add karein
+    headers.append("Content-Type", "application/json"); // Content-Type header add karein
+    return headers; // Poora headers object return karein
+};
     
     // --- API & DOM MANIPULATION ---
     const loadProfile = async () => {
