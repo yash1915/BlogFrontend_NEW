@@ -30,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await res.json();
             if (data.success) {
                 currentUser = data.user; // Save current user data
-                profilePicture.src = currentUser.image;
                 profileDetails.innerHTML = `
                     <p><strong>Name:</strong> ${currentUser.firstName} ${currentUser.lastName}</p>
                     <p><strong>Email:</strong> ${currentUser.email}</p>
