@@ -541,12 +541,3 @@ button.loading .button-text {
 .post-media-full {
     background-color: transparent; /* Audio player ka background theek karne ke liye */
 }
-
-.profile-avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 3px solid var(--secondary-color);
-    margin-bottom: 1.5rem;
-    background-color: var(--input-bg);
-}
