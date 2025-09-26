@@ -33,9 +33,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 profileDetails.innerHTML = `
                     <p><strong>Name:</strong> ${currentUser.firstName} ${currentUser.lastName}</p>
                     <p><strong>Email:</strong> ${currentUser.email}</p>
-                    <p><strong>About:</strong> ${currentUser.additionalDetails.about || 'Not set'}</p>
+                    <p><strong>About:</strong> ${currentUser.about || 'Not set'}</p>
                 `;
-                aboutTextarea.value = currentUser.additionalDetails.about || '';
+                aboutTextarea.value = currentUser.about || '';
             } else {
                 alert("Could not load profile.");
             }
