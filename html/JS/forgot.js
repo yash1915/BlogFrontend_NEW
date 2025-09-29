@@ -14,7 +14,7 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
     button.classList.add("loading");
 
     try {
-        const res = await fetch('https://blogbackend-new.onrender.com/api/v1/auth/forgot-password', {
+        const res = await fetch('https://blogbackend-new-x586.onrender.com/api/v1/auth/forgot-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             // Update the body to only send the email
