@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     // API URLs for different parts of the backend
-    const API_URL_AUTH = "https://blogbackend-new.onrender.com/api/v1/auth";
+    const API_URL_AUTH = "https://blogbackend-new-x586.onrender.com/api/v1/auth";
     let currentUser = null;
 
     // DOM Element Selectors
