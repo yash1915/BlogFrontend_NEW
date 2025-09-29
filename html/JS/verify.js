@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const verifyForm = document.getElementById("verify-form");
     const verifyButton = verifyForm.querySelector("button");
-    const API_URL = "https://blogbackend-new.onrender.com/api/v1";
+    const API_URL = "https://blogbackend-new-x586.onrender.com/api/v1";
 
     verifyForm.addEventListener("submit", async (e) => {
         e.preventDefault();
