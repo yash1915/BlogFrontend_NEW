@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const API_URL = "https://blogbackend-new.onrender.com/api/v1";
+    const API_URL = "https://blogbackend-new-x586.onrender.com/api/v1";
     let currentUser = null;
     // --- BUTTON HELPER ---
 const handleAsyncClick = async (button, asyncFunction) => {
