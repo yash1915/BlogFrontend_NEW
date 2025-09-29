@@ -26,11 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       // Send OTP
+      console.log("otpsent");
       const res = await fetch(`${API_URL}/auth/sendotp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      console.log(data);
       const data = await res.json();
       if (data.success) {
         alert("✅ OTP sent to your email. Please verify.");
