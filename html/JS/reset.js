@@ -32,7 +32,7 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
     button.classList.add("loading");
     
     try {
-        const res = await fetch('https://blogbackend-new.onrender.com/api/v1/auth/reset-password', {
+        const res = await fetch('https://blogbackend-new-x586.onrender.com/api/v1/auth/reset-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             // Update the body to remove deviceToken
