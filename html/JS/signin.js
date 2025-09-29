@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     signinButton.classList.add("loading");
 
     try {
-      const response = await fetch("https://blogbackend-new.onrender.com/api/v1/auth/login", {
+      const response = await fetch("https://blogbackend-new-x586.onrender.com/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
