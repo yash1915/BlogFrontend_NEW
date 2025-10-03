@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmPassword = document.getElementById("confirmPassword").value.trim();
 
     if (password !== confirmPassword) {
-      alert("⚠️ Passwords do not match!");
+      alert(" Passwords do not match!");
       return;
     }
 
@@ -36,10 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
        console.log(data);
       if (data.success) {
-        alert("✅ OTP sent to your email. Please verify.");
+        alert(" OTP sent to your email. Please verify.");
         window.location.href = "verify.html";
       } else {
-        alert(data.message || "❌ Failed to send OTP. User may already exist.");
+        alert(data.message || " Failed to send OTP. User may already exist.");
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
