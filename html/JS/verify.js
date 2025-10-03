@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert(" Signup successful! You are now logged in.");
                 window.location.href = "hom.html";
             } else {
-                alert(data.message ||  OTP verification failed. Please try again.");
+                alert(data.message ||  "OTP verification failed. Please try again.");
             }
         } catch (error) {
             console.error("Error verifying OTP:", error);
