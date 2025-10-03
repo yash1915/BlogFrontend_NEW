@@ -32,10 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.removeItem("pendingSignup");
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("user", JSON.stringify(data.user));
-                alert("✅ Signup successful! You are now logged in.");
+                alert(" Signup successful! You are now logged in.");
                 window.location.href = "hom.html";
             } else {
-                alert(data.message || "❌ OTP verification failed. Please try again.");
+                alert(data.message ||  OTP verification failed. Please try again.");
             }
         } catch (error) {
             console.error("Error verifying OTP:", error);
